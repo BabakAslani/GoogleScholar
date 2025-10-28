@@ -77,6 +77,25 @@ Your live site will be available at:
 https://<your-username>.github.io/GoogleScholar/
 ```
 
+## Automatic Updates ⚡
+
+Your Google Scholar stats are updated **automatically every week** using **GitHub Actions**.  
+
+- 🤖 The workflow is defined in `.github/workflows/update_scholar.yml`  
+- 📚 Fetches the latest citation data via the [Scholarly](https://pypi.org/project/scholarly/) Python library  
+- 📄 Updates the `scholar_stats.json` file, which is displayed on your GitHub Pages site  
+
+### 🔧 How to change the update frequency
+
+The schedule is controlled by a **cron expression** in the YAML file:
+
+```yaml
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # every Sunday at 00:00 UTC
+  workflow_dispatch:      # allows manual run from GitHub UI
+```
+
 ## Customization ✨
 
 - 🎨 **Change chart colors, fonts, or layout** in `index.html`  
