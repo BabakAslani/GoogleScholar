@@ -1,6 +1,8 @@
 # Google Scholar Live Stats
 
-![Google Scholar](https://babakaslani.github.io/GoogleScholar/)  
+[![Google Scholar](https://upload.wikimedia.org/wikipedia/commons/2/28/Google_Scholar_logo.png)](https://babakaslani.github.io/GoogleScholar/)
+
+
 
 This repository provides a **live, weekly-updated visualization of your Google Scholar citations**, including:
 
