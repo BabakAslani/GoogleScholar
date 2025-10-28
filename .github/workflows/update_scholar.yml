@@ -1,0 +1,38 @@
+name: Update Scholar Stats
+
+# Trigger: weekly (Sunday) and manual
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # every Sunday at 00:00 UTC
+  workflow_dispatch:      # allows manual run from GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: pip install scholarly
+
+      # 4️⃣ Run your Python script
+      - name: Run script
+        run: python update_scholar_stats.py
+
+      # 5️⃣ Commit & push updated JSON
+      - name: Commit & Push JSON
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add scholar_stats.json
+          git commit -m "Update Scholar stats [skip ci]" || echo "No changes"
+          git push
