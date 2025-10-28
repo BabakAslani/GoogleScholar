@@ -1,37 +1,30 @@
 from scholarly import scholarly
 import json
-from collections import defaultdict
+from datetime import datetime
 
-SCHOLAR_ID = "s60m-LwAAAAJ"
+# Replace with your Google Scholar ID
+author_id = "s60m-LwAAAAJ"
 
-# Fetch author
-author = scholarly.search_author_id(SCHOLAR_ID)
-author = scholarly.fill(author, sections=['publications', 'indices'])
+author = scholarly.search_author_id(author_id)
+author = scholarly.fill(author)
 
-# Total citations and h-index
-total_citations = author.get('citedby', 0)
-h_index = author.get('hindex', 0)
+# Extract stats
+total_citations = author['citedby']
+h_index = author['hindex']
+i10_index = author.get('i10index', 0)  # fallback to 0 if not present
+cites_per_year = author.get('cites_per_year', {})  # dictionary
 
-# Compute citations per year
-citations_per_year = defaultdict(int)
-
-for pub in author.get('publications', []):
-    pub_filled = scholarly.fill(pub)
-    if 'cites_per_year' in pub_filled:
-        for year, count in pub_filled['cites_per_year'].items():
-            citations_per_year[year] += count
-
-# Convert defaultdict to normal dict and sort
-citations_per_year = dict(sorted(citations_per_year.items()))
-
-# Save JSON
-output = {
+# Add last updated timestamp
+stats = {
     "total_citations": total_citations,
     "h_index": h_index,
-    "citations_per_year": citations_per_year
+    "i10_index": i10_index,
+    "citations_per_year": cites_per_year,
+    "last_updated": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 }
 
+# Save to JSON
 with open("scholar_stats.json", "w") as f:
-    json.dump(output, f, indent=2)
+    json.dump(stats, f, indent=4)
 
-print("scholar_stats.json generated successfully!")
+print("Updated scholar_stats.json successfully.")
