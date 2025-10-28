@@ -29,8 +29,7 @@ Everything is automatically updated via **GitHub Actions** and displayed beautif
 
 ## Demo
 
-Check out the live page:  
-https://www.babakaslani.com/publications
+Check out the live pages: [My Publications](https://www.babakaslani.com/publications) and [Google Scholar Stats](https://babakaslani.github.io/GoogleScholar/)
 
 ---
 
