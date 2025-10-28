@@ -1,5 +1,5 @@
 name: Update Scholar Stats
-
+#Test
 # Trigger: weekly (Sunday) and manual
 on:
   schedule:
