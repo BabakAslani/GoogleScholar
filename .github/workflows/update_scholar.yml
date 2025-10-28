@@ -1,5 +1,5 @@
 name: Update Scholar Stats
-#Test
+#Tested and working GitHub Actions workflow to update scholar stats weekly
 # Trigger: weekly (Sunday) and manual
 on:
   schedule:
