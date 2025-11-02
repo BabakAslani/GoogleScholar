@@ -1,6 +1,6 @@
 name: Update Scholar Stats
-#Tested and working GitHub Actions workflow to update scholar stats weekly
-# Trigger: weekly (Sunday) and manual
+# Run this workflow weekly or manually using your self-hosted macOS runner
+
 on:
   schedule:
     - cron: '0 0 * * 0'   # every Sunday at 00:00 UTC
@@ -8,31 +8,33 @@ on:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # ✅ now uses your Mac runner instead of GitHub-hosted Ubuntu
 
     steps:
       # 1️⃣ Checkout repo
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 2️⃣ Set up Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'  # specify exact version for reliability
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: pip install scholarly
+        run: |
+          python -m pip install --upgrade pip
+          pip install scholarly
 
       # 4️⃣ Run your Python script
-      - name: Run script
+      - name: Run update script
         run: python update_scholar_stats.py
 
       # 5️⃣ Commit & push updated JSON
-      - name: Commit & Push JSON
+      - name: Commit & Push updated JSON
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add scholar_stats.json
-          git commit -m "Update Scholar stats [skip ci]" || echo "No changes"
+          git commit -m "Update Scholar stats [skip ci]" || echo "No changes to commit"
           git push
