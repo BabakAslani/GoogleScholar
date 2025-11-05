@@ -65,11 +65,32 @@ git commit -m "Add initial scholar stats"
 git push origin main
 ```
 
-### 6. GitHub Actions
-The workflow in .github/workflows/update_scholar.yml automatically updates your stats weekly.
+### 6. Self-Hosted GitHub Actions Runner (Recommended)
+
+To avoid Google Scholar rate limits on cloud runners, you can run the workflow on your own machine:
+
+Go to your GitHub repo → Settings → Actions → Runners → New self-hosted runner
+
+Follow the setup commands for your OS (macOS example):
+
+```bash
+mkdir actions-runner && cd actions-runner
+curl -o actions-runner-osx-x64.tar.gz -L https://github.com/actions/runner/releases/download/v2.329.0/actions-runner-osx-x64-2.329.0.tar.gz
+tar xzf ./actions-runner-osx-x64.tar.gz
+./config.sh --url https://github.com/<your-username>/GoogleScholar --token <your-token>
+./run.sh
+```
+Update .github/workflows/update.yml to use your runner:
+```bash
+runs-on: self-hosted
+```
+The workflow will now execute locally, fetching Scholar stats from your own IP.
+
+### 7. GitHub Actions
+The workflow in .github/workflows/update.yml automatically updates your stats weekly.
 You can also trigger it manually from the Actions tab in GitHub.
 
-### 7. GitHub Pages
+### 8. GitHub Pages
 Enable GitHub Pages from Settings → Pages → Source → main / root.
 Your live site will be available at:
 ```bash
@@ -80,9 +101,10 @@ https://<your-username>.github.io/GoogleScholar/
 
 Your Google Scholar stats are updated **automatically every week** using **GitHub Actions**.  
 
-- 🤖 The workflow is defined in `.github/workflows/update_scholar.yml`  
+- 🤖 The workflow is defined in `.github/workflows/update.yml`  
 - 📚 Fetches the latest citation data via the [Scholarly](https://pypi.org/project/scholarly/) Python library  
-- 📄 Updates the `scholar_stats.json` file, which is displayed on your GitHub Pages site  
+- 📄 Updates the `scholar_stats.json` file, which is displayed on your GitHub Pages site
+
 
 ### 🔧 How to change the update frequency
 
@@ -100,6 +122,42 @@ on:
 - 🎨 **Change chart colors, fonts, or layout** in `index.html`  
 - 🏷️ **Add badges or additional metrics** if desired  
 - ⚡ **Cache-busting** is built-in for JSON updates  
+
+
+## 📦 Requirements
+
+- **Python 3.11+**  
+- [Scholarly](https://pypi.org/project/scholarly/) Python library:
+
+```bash
+pip install scholarly
+```
+
+## 📈 Output
+
+The workflow produces a file:
+```bash
+scholar_stats.json
+```
+
+Example contents:
+```bash
+{
+  "name": "John Doe",
+  "h_index": 25,
+  "citations": 3241,
+  "i10_index": 35,
+  "last_update": "2025-10-29"
+}
+```
+
+## 🧠 Future Extensions
+
+Convert this logic into a Python package that outputs embeddable HTML code.
+
+Add visualization charts (citations over time, top publications).
+
+Enable caching for large profiles.
 
 ---
 
