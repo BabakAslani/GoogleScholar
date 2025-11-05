@@ -26,7 +26,7 @@ for p in papers:
     c20 = sum(count for year, count in cites_yearly.items() if int(year) >= 2020)
     citations_since_2020_list.append(c20)
 
-# Compute h-index since 2020
+# Compute h-index since 2020 author
 sorted_cites = sorted(citations_since_2020_list, reverse=True)
 h_index_since_2020 = 0
 for i, c in enumerate(sorted_cites):
