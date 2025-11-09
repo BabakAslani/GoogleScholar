@@ -8,19 +8,20 @@ on:
 
 jobs:
   update:
-    runs-on: self-hosted   # ✅ now uses your Mac runner
+    runs-on: self-hosted   # uses your Mac runner
     permissions:
-      contents: write      # ✅ allow committing & pushing changes
+      contents: write      # allow committing & pushing changes
 
     steps:
       # 1️⃣ Checkout repo
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'  # specify exact version for reliability
+          python-version: '3.11'
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
@@ -28,24 +29,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install scholarly
 
-      # 3a️⃣ Debug info before running script
-      - name: Debug Info
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Files here: $(ls -al)"
-          echo "Python version: $(python --version)"
-          echo "Python path: $(which python)"
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
-
       # 4️⃣ Run your Python script
       - name: Run update script
-        working-directory: ${{ github.workspace }}   # ✅ ensure correct directory
-        run: python update_scholar_stats.py
+        working-directory: ${{ github.workspace }}   # ensures script runs inside checked-out repo
+        run: |
+          echo "Starting Scholar update..."
+          python update_scholar_stats.py 2>&1 | tee update_script.log
 
       # 5️⃣ Commit & push updated JSON
       - name: Commit & Push updated JSON
+        working-directory: ${{ github.workspace }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ authenticate push
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # authenticate push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
