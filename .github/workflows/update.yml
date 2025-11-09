@@ -2,7 +2,7 @@ name: Update Scholar Stats
 
 on:
   schedule:
-    - cron: '0 0 * * 0'   # every Sunday
+    - cron: '0 0 * * 0'
   workflow_dispatch:
 
 jobs:
@@ -14,31 +14,28 @@ jobs:
       HOME: ${{ github.workspace }}
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
+      - name: Create virtualenv & install dependencies
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install scholarly
         working-directory: ${{ github.workspace }}
 
-      # 4️⃣ Run update script
       - name: Run Scholar update
         run: |
-          echo "Starting Scholar update..."
+          source venv/bin/activate
           python update_scholar_stats.py 2>&1 | tee update_script.log
         working-directory: ${{ github.workspace }}
 
-      # 5️⃣ Commit & Push updated JSON
       - name: Commit & Push updated JSON
         run: |
           git config user.name "github-actions"
