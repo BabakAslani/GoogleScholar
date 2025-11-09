@@ -143,11 +143,22 @@ scholar_stats.json
 Example contents:
 ```bash
 {
-  "name": "John Doe",
-  "h_index": 25,
-  "citations": 3241,
-  "i10_index": 35,
-  "last_update": "2025-10-29"
+    "total_citations": 283,
+    "h_index": 8,
+    "i10_index": 8,
+    "citations_per_year": {
+        "2018": 1,
+        "2019": 1,
+        "2020": 8,
+        "2021": 20,
+        "2022": 44,
+        "2023": 63,
+        "2024": 71,
+        "2025": 73
+    },
+    "h_index_recent": 8,
+    "i10_index_recent": 8,
+    "last_updated": "2025-11-05 04:35 UTC"
 }
 ```
 
