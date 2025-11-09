@@ -4,46 +4,61 @@ name: Update Scholar Stats
 on:
   schedule:
     - cron: '0 0 * * 0'   # every Sunday at 00:00 UTC
-  workflow_dispatch:      # allows manual run from GitHub UI
+  workflow_dispatch:
 
 jobs:
   update:
-    runs-on: self-hosted   # uses your Mac runner
+    runs-on: self-hosted
     permissions:
-      contents: write      # allow committing & pushing changes
+      contents: write
+    env:
+      HOME: ${{ github.workspace }}  # redirect any $HOME writes to repo folder
+      PATH: ${{ github.workspace }}/venv/bin:$PATH  # optional if using virtualenv
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
+        working-directory: ${{ github.workspace }}
 
       # 2️⃣ Set up Python
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+        working-directory: ${{ github.workspace }}
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
+      # 3️⃣ Optional: create virtual environment inside repo
+      - name: Create Python virtualenv
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install scholarly
+        working-directory: ${{ github.workspace }}
 
-      # 4️⃣ Run your Python script
-      - name: Run update script
-        working-directory: ${{ github.workspace }}   # ensures script runs inside checked-out repo
+      # 4️⃣ Install dependencies
+      - name: Install Python dependencies
         run: |
+          source venv/bin/activate
+          pip install scholarly
+        working-directory: ${{ github.workspace }}
+
+      # 5️⃣ Run update script
+      - name: Run Scholar update
+        run: |
+          source venv/bin/activate
           echo "Starting Scholar update..."
           python update_scholar_stats.py 2>&1 | tee update_script.log
-
-      # 5️⃣ Commit & push updated JSON
-      - name: Commit & Push updated JSON
         working-directory: ${{ github.workspace }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # authenticate push
+
+      # 6️⃣ Commit & push updated JSON
+      - name: Commit & Push updated JSON
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add scholar_stats.json
           git commit -m "Update Scholar stats [skip ci]" || echo "No changes to commit"
           git push
+        working-directory: ${{ github.workspace }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
