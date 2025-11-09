@@ -28,6 +28,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install scholarly
 
+      # 3a️⃣ Debug info before running script
+      - name: Debug Info
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Files here: $(ls -al)"
+          echo "Python version: $(python --version)"
+          echo "Python path: $(which python)"
+          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
+
       # 4️⃣ Run your Python script
       - name: Run update script
         working-directory: ${{ github.workspace }}   # ✅ ensure correct directory
