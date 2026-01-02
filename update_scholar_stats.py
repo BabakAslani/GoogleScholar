@@ -2,50 +2,54 @@ from scholarly import scholarly
 import json
 from datetime import datetime, timezone
 
-# Replace with your Google Scholar ID
 author_id = "s60m-LwAAAAJ"
 
-# Fetch author profile
+# Fetch profile
 author = scholarly.search_author_id(author_id)
 author = scholarly.fill(author)
 
-# Extract overall stats
+# Overall stats
 total_citations = author['citedby']
 h_index = author['hindex']
 i10_index = author.get('i10index', 0)
-cites_per_year = author.get('cites_per_year', {})  # dictionary
+cites_per_year = author.get('cites_per_year', {})
 
-# Compute "Since 2020" stats
+# --- Automatic recent window (last 5 years including current) ---
+current_year = datetime.now().year
+recent_start_year = current_year - 5  # 2026 → 2021, 2027 → 2022, 2028 → 2023, ...
+
+# Collect recent citations per paper
 papers = author.get('publications', [])
-citations_since_2020_list = []
+citations_recent = []
 
 for p in papers:
-    paper_filled = scholarly.fill(p)
-    cites_yearly = paper_filled.get('cites_per_year', {})
-    # Sum citations from 2020 onward
-    c20 = sum(count for year, count in cites_yearly.items() if int(year) >= 2020)
-    citations_since_2020_list.append(c20)
+    pf = scholarly.fill(p)
+    cpy = pf.get('cites_per_year', {})
+    c_recent = sum(count for year, count in cpy.items() if int(year) >= recent_start_year)
+    citations_recent.append(c_recent)
 
-# Compute h-index since 2020 author
-sorted_cites = sorted(citations_since_2020_list, reverse=True)
-h_index_since_2020 = 0
+# Compute recent h-index
+sorted_cites = sorted(citations_recent, reverse=True)
+h_index_recent = 0
 for i, c in enumerate(sorted_cites):
     if c >= i + 1:
-        h_index_since_2020 = i + 1
+        h_index_recent = i + 1
     else:
         break
 
-# Compute i10-index since 2020
-i10_index_since_2020 = sum(1 for c in citations_since_2020_list if c >= 10)
+# Compute recent i10-index
+i10_index_recent = sum(1 for c in citations_recent if c >= 10)
 
-# Add last updated timestamp (timezone-aware UTC)
+# Build JSON stats
 stats = {
     "total_citations": total_citations,
     "h_index": h_index,
     "i10_index": i10_index,
     "citations_per_year": cites_per_year,
-    "h_index_recent": h_index_since_2020,
-    "i10_index_recent": i10_index_since_2020,
+    "h_index_recent": h_index_recent,
+    "i10_index_recent": i10_index_recent,
+    "recent_start_year": recent_start_year,
+    "current_year": current_year,
     "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 }
 
