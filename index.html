@@ -100,7 +100,7 @@
 
 <script>
 async function renderScholarChart() {
-    const url = 'https://babakaslani.github.io/GoogleScholar/scholar_stats.json?cache=' + new Date().getTime();
+    const url = 'scholar_stats.json?cache=' + new Date().getTime();
     let data;
     try {
         const resp = await fetch(url);
@@ -110,49 +110,42 @@ async function renderScholarChart() {
         return;
     }
 
-    const years = Object.keys(data.citations_per_year || {}).sort();
-    const citations = years.map(y => Number(data.citations_per_year[y] || 0));
+    // ---- Rolling time windows ----
+    const currentYear = new Date().getFullYear();
+    const recentStart5 = currentYear - 5;   // last 5 years including current
+    const recentStart8 = currentYear - 8;   // last 8 years including current
 
-    // total citations
-    const totalCitations = data.total_citations ?? citations.reduce((a,b)=>a+b,0);
+    // Sort years from JSON
+    const allYears = Object.keys(data.citations_per_year || {})
+                          .map(y => Number(y))
+                          .sort((a,b)=>a-b);
 
-    // citations since 2020
-    const citationsSince2020 = years.filter(y=>Number(y)>=2020).reduce((s,y)=>s + Number(data.citations_per_year[y]||0),0);
+    // Take only last 8 years for chart
+    const chartYears = allYears.filter(y => y >= recentStart8);
+    const chartCitations = chartYears.map(y => Number(data.citations_per_year[y] || 0));
 
-    // overall h-index & i10-index
-    const hAll = data.h_index ?? '--';
-    const i10All = data.i10_index ?? '--';
+    // Compute citation sums for table
+    const totalCitationsAll = data.total_citations ?? allYears.reduce((s,y)=>s + Number(data.citations_per_year[y]||0), 0);
+    const totalCitations5   = allYears.filter(y => y >= recentStart5)
+                                     .reduce((s,y)=>s + Number(data.citations_per_year[y]||0), 0);
 
-    // update table
-    document.getElementById('citationsAll').textContent = totalCitations;
-    document.getElementById('citations2020').textContent = citationsSince2020;
-    document.getElementById('hindexAll').textContent = hAll;
-    document.getElementById('hindex2020').textContent = data.h_index_recent;
-    document.getElementById('i10All').textContent = i10All;
-    document.getElementById('i10_2020').textContent = data.i10_index_recent;
-
+    // Update stats table
+    document.getElementById('citationsAll').textContent = totalCitationsAll;
+    document.getElementById('citations2020').textContent = totalCitations5; // now means "since 5 years ago"
+    document.getElementById('hindexAll').textContent = data.h_index ?? '--';
+    document.getElementById('hindex2020').textContent = data.h_index_recent ?? '--';
+    document.getElementById('i10All').textContent = data.i10_index ?? '--';
+    document.getElementById('i10_2020').textContent = data.i10_index_recent ?? '--';
     document.getElementById('lastUpdated').textContent = "Last updated: " + (data.last_updated || "--");
 
-    // create chart with gradient bars
+    // Render chart
     const ctx = document.getElementById('citationsChart').getContext('2d');
-
-    const barGradients = citations.map((c, i) => {
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        const factor = (i + 1) / years.length; // older → lighter, recent → darker
-        const light = 180 + Math.round(50 * (1 - factor)); // 180 → 230 for older bars
-        gradient.addColorStop(0, `rgba(${light},${light},${light},0.9)`);
-        gradient.addColorStop(1, `rgba(${light},${light},${light},0.6)`);
-        return gradient;
-    });
-
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: years,
+            labels: chartYears,
             datasets: [{
-                label: 'Citations per Year',
-                data: citations,
-                backgroundColor: barGradients,
+                data: chartCitations,
                 borderRadius: 6,
                 borderSkipped: false
             }]
@@ -181,6 +174,7 @@ async function renderScholarChart() {
 
 renderScholarChart();
 </script>
+
 
 </body>
 </html>
