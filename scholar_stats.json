@@ -1,5 +1,5 @@
 {
-    "total_citations": 346,
+    "total_citations": 348,
     "h_index": 10,
     "i10_index": 10,
     "citations_per_year": {
@@ -7,15 +7,15 @@
         "2019": 1,
         "2020": 8,
         "2021": 19,
-        "2022": 46,
-        "2023": 61,
+        "2022": 45,
+        "2023": 62,
         "2024": 68,
         "2025": 87,
-        "2026": 53
+        "2026": 54
     },
     "h_index_recent": 10,
     "i10_index_recent": 10,
     "recent_start_year": 2021,
     "current_year": 2026,
-    "last_updated": "2026-06-07 03:41 UTC"
+    "last_updated": "2026-06-14 03:52 UTC"
 }
