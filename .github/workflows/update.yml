@@ -8,41 +8,53 @@ on:
 jobs:
   update:
     runs-on: self-hosted
+
     permissions:
       contents: write
-    env:
-      HOME: ${{ github.workspace }}
 
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       # 2️⃣ Create virtual environment & install dependencies
       - name: Setup Python venv & install scholarly
         run: |
-          # Use Python 3 installed on your Mac
           python3 -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install scholarly
-        working-directory: ${{ github.workspace }}
 
       # 3️⃣ Run the Scholar update script
       - name: Run Scholar update
+        shell: bash
         run: |
+          set -o pipefail
           source venv/bin/activate
           python update_scholar_stats.py 2>&1 | tee update_script.log
-        working-directory: ${{ github.workspace }}
+
+          echo "----- JSON after update -----"
+          cat scholar_stats.json
 
       # 4️⃣ Commit & push updated JSON
       - name: Commit & Push updated JSON
         run: |
+          echo "----- Git status before commit -----"
+          git status
+
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
           git add scholar_stats.json
-          git commit -m "Update Scholar stats [skip ci]" || echo "No changes to commit"
-          git push
-        working-directory: ${{ github.workspace }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          echo "----- Staged changes -----"
+          git diff --cached -- scholar_stats.json
+
+          if git diff --cached --quiet; then
+            echo "No changes detected in scholar_stats.json."
+          else
+            git commit -m "Update Scholar stats [skip ci]"
+            git push origin HEAD:main
+          fi
